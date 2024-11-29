@@ -13,6 +13,10 @@ public class Player_Ctrl : MonoBehaviour
     float xRotation;
     Camera cam;
 
+    [Header("UI Control")]
+    public GameObject panel; // UI 패널 오브젝트
+    private bool isPanelActive = false; // 패널 활성화 상태 플래그
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;   // 마우스 커서를 화면 안에서 고정
@@ -26,12 +30,28 @@ public class Player_Ctrl : MonoBehaviour
 
     void Update()
     {
-        Rotate();
+        // 패널 활성화 상태 업데이트
+        if (panel != null)
+        {
+            isPanelActive = panel.activeSelf;
+        }
+
+        // 패널이 활성화된 상태에서는 Rotate 비활성화
+        if (!isPanelActive)
+        {
+            Rotate(); // 패널이 비활성화된 경우에만 시야 회전
+        }
+
+        // ESC 키로 패널 닫기
+        if (Input.GetKeyDown(KeyCode.Escape) && isPanelActive)
+        {
+            ClosePanel();
+        }
     }
 
     void Rotate()
     {
-        float mouseX = Input.GetAxisRaw("Mouse X") * mouseSpeed; // Time.deltaTime 제거
+        float mouseX = Input.GetAxisRaw("Mouse X") * mouseSpeed;
         float mouseY = Input.GetAxisRaw("Mouse Y") * mouseSpeed;
 
         yRotation += mouseX;    // 마우스 X축 입력에 따라 수평 회전 값을 조정
@@ -41,5 +61,25 @@ public class Player_Ctrl : MonoBehaviour
 
         cam.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0); // 카메라의 회전을 조절
         transform.rotation = Quaternion.Euler(0, yRotation, 0);             // 플레이어 캐릭터의 회전을 조절
+    }
+
+    public void OpenPanel()
+    {
+        if (panel != null)
+        {
+            panel.SetActive(true); // 패널 활성화
+            Cursor.lockState = CursorLockMode.None; // 마우스 커서 활성화
+            Cursor.visible = true;
+        }
+    }
+
+    void ClosePanel()
+    {
+        if (panel != null)
+        {
+            panel.SetActive(false); // 패널 비활성화
+            Cursor.lockState = CursorLockMode.Locked; // 마우스 커서 잠금
+            Cursor.visible = false;
+        }
     }
 }
